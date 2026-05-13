@@ -147,318 +147,266 @@
             </div>
         </div>
     </div>
-<script>
-    // =========================
-    // KONFIGURASI
-    // =========================
-    const apiKey = "AIzaSyAOGiYmgTrco3_IndPMnb87CShBQ7O5vo4";
 
-    const CONFIG = {
-        SHEET_ID: '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k',
+    <script>
+        const apiKey = "AIzaSyAOGiYmgTrco3_IndPMnb87CShBQ7O5vo4"; 
+        const CONFIG = {
+            SHEET_ID: '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k',
+            MODEL: 'gemini-1.5-flash'
+        };
 
-        // MODEL STABIL
-        MODEL: 'gemini-1.5-flash'
-    };
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+        
+        let realData = [];
+        let isProcessingAI = false;
 
-    const CSV_URL =
-        `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+        // Kolom Target (0-based): O=14, P=15, Y=24, Z=25, AI=34, AJ=35, AS=44, AT=45, BC=54, BD=55, BM=64, BN=65, BW=74, BX=75
+        const TARGET_COLS = [14, 15, 24, 25, 34, 35, 44, 45, 54, 55, 64, 65, 74, 75];
 
-    let realData = [];
-    let isProcessingAI = false;
+        // 10 Variasi Teks Statis untuk Fallback
+        const VARIANT_TEXTS = [
+            "Bapak/Ibu {nama} dari {lembaga} menunjukkan dedikasi yang luar biasa dalam proses pembelajaran. Implementasi metode di kelas terlihat konsisten dan patut menjadi contoh bagi rekan sejawat.",
+            "Apresiasi tinggi untuk {nama} atas kontribusinya di {lembaga}. Fokus pada detail administrasi dan interaksi siswa menunjukkan profesionalisme yang kuat sebagai ASN.",
+            "Strategi yang diterapkan oleh {nama} di {lembaga} sangat inovatif. Terus pertahankan semangat kreatif ini untuk meningkatkan kualitas pendidikan di lingkungan kerja Anda.",
+            "Data menunjukkan bahwa {nama} memiliki komitmen tinggi terhadap visi sekolah {lembaga}. Langkah-langkah pengembangan yang diambil sudah sangat tepat dan strategis.",
+            "Terima kasih Bapak/Ibu {nama}. Semangat Anda dalam mengabdi di {lembaga} tercermin dari respon yang sistematis. Disarankan untuk terus mengeksplorasi penggunaan teknologi pembelajaran.",
+            "Bapak/Ibu {nama} adalah aset berharga bagi {lembaga}. Fokus Anda pada penguatan karakter siswa sangat selaras dengan program kementerian saat ini.",
+            "Respon dari {nama} mencerminkan pemahaman mendalam tentang tugas pokok guru. Kami mendorong {lembaga} untuk terus memfasilitasi ruang diskusi bersama bagi pendidik seperti Anda.",
+            "Analisis awal menunjukkan {nama} sangat teliti dalam merencanakan pembelajaran di {lembaga}. Pertahankan ketertiban administrasi ini sebagai fondasi best practice.",
+            "Upaya berkelanjutan yang dilakukan {nama} di {lembaga} memberikan dampak positif pada ekosistem sekolah. Teruslah menjadi inspirasi bagi murid-murid Anda.",
+            "Bapak/Ibu {nama} menunjukkan progres yang signifikan dalam pengisian instrumen ini. Hal ini mencerminkan keterbukaan Anda terhadap evaluasi dan pengembangan diri di {lembaga}."
+        ];
 
-    // =========================
-    // KOLOM TARGET
-    // =========================
-    const TARGET_COLS = [14, 15, 24, 25, 34, 35, 44, 45, 54, 55, 64, 65, 74, 75];
+        async function callGemini(prompt, fallback) {
+            if (!apiKey) return fallback;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL}:generateContent?key=${apiKey}`;
+            
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: "Anda adalah asisten cerdas Prof. Ma'ruf Suroso. Berikan analisis atau rekomendasi positif yang sangat spesifik berdasarkan data yang diberikan. Hindari teks umum. Jika data minim, tetap berikan apresiasi yang menyemangati guru." }] }
+                        })
+                    });
 
-    // =========================
-    // FALLBACK TEXT
-    // =========================
-const VARIANT_TEXTS = [
-    "Dedikasi {nama} di {lembaga} sangat baik dan patut diapresiasi.",
-
-    "Kontribusi {nama} di {lembaga} menunjukkan profesionalisme tinggi.",
-
-    "{nama} telah menunjukkan semangat pengabdian yang positif di {lembaga}.",
-
-    "Kinerja dan partisipasi {nama} di {lembaga} sangat baik.",
-
-    "{nama} menjadi bagian penting dalam penguatan mutu pendidikan di {lembaga}.",
-
-    "Komitmen {nama} dalam mendukung program sekolah di {lembaga} terlihat sangat konsisten dan inspiratif.",
-
-    "{nama} menunjukkan kemampuan adaptasi yang baik dalam mendukung pembelajaran di {lembaga}.",
-
-    "Peran aktif {nama} di {lembaga} memberikan dampak positif bagi lingkungan pendidikan.",
-
-    "Semangat kerja dan loyalitas {nama} di {lembaga} layak menjadi teladan bagi rekan sejawat.",
-
-    "{nama} telah menunjukkan kepedulian tinggi terhadap kualitas layanan pendidikan di {lembaga}.",
-
-    "Partisipasi aktif {nama} mencerminkan dedikasi yang kuat dalam memajukan {lembaga}.",
-
-    "Konsistensi {nama} dalam menjalankan tugas di {lembaga} menunjukkan integritas dan tanggung jawab yang baik.",
-
-    "{nama} mampu memberikan kontribusi positif dalam menciptakan suasana belajar yang kondusif di {lembaga}.",
-
-    "Upaya yang dilakukan {nama} di {lembaga} menunjukkan komitmen terhadap peningkatan mutu pendidikan.",
-
-    "{nama} merupakan salah satu pendidik yang berperan penting dalam mendukung kemajuan {lembaga} secara berkelanjutan."
-];
-
-    // =========================
-    // GEMINI API
-    // =========================
-    async function callGemini(prompt, fallback) {
-
-        if (!apiKey || apiKey.includes("AIzaSyAOGiYmgTrco3_IndPMnb87CShBQ7O5vo4")) {
-            console.error("API KEY BELUM DIISI");
-            return fallback;
-        }
-
-        const url =
-            `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL}:generateContent?key=${apiKey}`;
-
-        try {
-
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                {
-                                    text: prompt
-                                }
-                            ]
-                        }
-                    ]
-                })
-            });
-
-            // DEBUG ERROR
-            if (!response.ok) {
-
-                const errText = await response.text();
-
-                console.error("GEMINI ERROR:");
-                console.error(errText);
-
-                return fallback;
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.candidates?.[0]?.content?.parts?.[0]?.text || fallback;
+                    }
+                    await new Promise(res => setTimeout(res, 1000));
+                } catch (e) {
+                    if (i === 2) return fallback;
+                }
             }
-
-            const data = await response.json();
-
-            console.log("GEMINI SUCCESS:", data);
-
-            return data?.candidates?.[0]?.content?.parts?.[0]?.text || fallback;
-
-        } catch (error) {
-
-            console.error("FETCH ERROR:", error);
-
             return fallback;
         }
-    }
 
-    // =========================
-    // AMBIL DATA SHEET
-    // =========================
-    async function fetchData() {
+        async function fetchData() {
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                const rows = csvText.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"(.*)"$/, '$1')));
 
-        try {
-
-            const response = await fetch(CSV_URL);
-
-            const csvText = await response.text();
-
-            const rows = csvText
-                .split('\n')
-                .map(row =>
-                    row
-                    .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-                    .map(cell => cell.replace(/^"(.*)"$/, '$1'))
-                );
-
-            realData = rows
-                .slice(1)
-                .filter(r => r[2] && r[2].trim() !== "")
-                .map(r => ({
+                realData = rows.slice(1).filter(r => r[2] && r[2].trim() !== "").map(r => ({
                     waktu: r[0],
                     nama: r[2],
                     lembaga: r[3] || "Umum",
-                    details: TARGET_COLS
-                        .map(idx => r[idx] ? r[idx].trim() : "")
-                        .filter(val => val !== "")
+                    details: TARGET_COLS.map(idx => r[idx] ? r[idx].trim() : "").filter(val => val !== ""),
+                    rawRow: r
                 }));
-
-            updateDashboardUI();
-
-        } catch (error) {
-
-            console.error("GAGAL LOAD SHEET:", error);
-
+                
+                populateFilter();
+                updateDashboardUI();
+                
+                if(!document.getElementById('section-recommendations').classList.contains('hidden')) {
+                    renderRecommendations();
+                }
+            } catch (e) {
+                console.error("Gagal sinkronisasi data.");
+            }
         }
-    }
 
-    // =========================
-    // DASHBOARD
-    // =========================
-    function updateDashboardUI() {
+        function populateFilter() {
+            const filterEl = document.getElementById('school-filter');
+            const currentValue = filterEl.value;
+            const schools = [...new Set(realData.map(d => d.lembaga))].sort();
+            
+            filterEl.innerHTML = `<option value="all">Semua Lembaga (10 Terbaru)</option>` + 
+                schools.map(s => `<option value="${s}">${s}</option>`).join('');
+            
+            filterEl.value = currentValue;
+        }
 
-        document.getElementById('total-count').innerText = realData.length;
+        function updateDashboardUI() {
+            document.getElementById('total-count').innerText = realData.length;
+            
+            document.getElementById('participant-list').innerHTML = realData.slice(-10).reverse().map(p => `
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm animate-slide">
+                    <div class="font-bold text-gray-800">${p.nama} <span class="text-[10px] text-gray-400 block uppercase font-black tracking-tight">${p.lembaga}</span></div>
+                    <div class="text-[10px] bg-gray-50 px-2 py-1 rounded-lg text-gray-400 font-bold">${p.waktu.split(' ')[1] || ''}</div>
+                </div>
+            `).join('');
 
-        document.getElementById('participant-list').innerHTML =
-            realData
-            .slice(-10)
-            .reverse()
-            .map(p => `
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                    <div class="font-bold text-gray-800">
-                        ${p.nama}
+            const stats = {};
+            realData.forEach(d => stats[d.lembaga] = (stats[d.lembaga] || 0) + 1);
+            const sortedLembaga = Object.entries(stats).sort((a,b) => b[1]-a[1]);
+            
+            document.getElementById('top-schools').innerHTML = sortedLembaga.slice(0, 5).map(([name, count]) => `
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs font-bold mb-1.5 text-gray-700">
+                        <span class="truncate pr-2">${name}</span>
+                        <span>${count}</span>
                     </div>
-
-                    <div class="text-xs text-blue-600 mt-1">
-                        ${p.lembaga}
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="bg-blue-600 h-full rounded-full transition-all duration-700" style="width:${(count/realData.length)*100}%"></div>
                     </div>
                 </div>
-            `)
-            .join('');
-    }
-
-    // =========================
-    // ANALISIS STRATEGIS
-    // =========================
-    async function generateStrategicAdvice() {
-
-        if (isProcessingAI) return;
-
-        isProcessingAI = true;
-
-        const textEl =
-            document.getElementById('ai-insight-text');
-
-        textEl.innerText =
-            "AI sedang menganalisis data...";
-
-        const stats = {};
-
-        realData.forEach(d => {
-            stats[d.lembaga] =
-                (stats[d.lembaga] || 0) + 1;
-        });
-
-        const schoolSummary =
-            Object.entries(stats)
-            .map(([k, v]) => `${k}: ${v}`)
-            .join(", ");
-
-        const prompt =
-            `Total responden ${realData.length}. Data lembaga: ${schoolSummary}. Berikan evaluasi singkat.`;
-
-        const fallback =
-            "Partisipasi survei berjalan baik. Tingkatkan pendampingan pada lembaga dengan jumlah responden rendah.";
-
-        const result =
-            await callGemini(prompt, fallback);
-
-        textEl.innerText = result;
-
-        isProcessingAI = false;
-    }
-
-    // =========================
-    // REKOMENDASI GURU
-    // =========================
-    async function renderRecommendations() {
-
-        const container =
-            document.getElementById('recommendation-container');
-
-        const latestData =
-            [...realData]
-            .reverse()
-            .slice(0, 5);
-
-        container.innerHTML = "";
-
-        // BATASI HANYA 5
-        // AGAR TIDAK KENA LIMIT API
-
-        for (let i = 0; i < latestData.length; i++) {
-
-            const teacher = latestData[i];
-
-            const fallback =
-                VARIANT_TEXTS[i % VARIANT_TEXTS.length]
-                .replace("{nama}", teacher.nama)
-                .replace("{lembaga}", teacher.lembaga);
-
-            const card = document.createElement("div");
-
-            card.className =
-                "bg-white p-6 rounded-3xl border border-gray-100 shadow-sm";
-
-            card.innerHTML = `
-                <h3 class="font-black text-gray-800">
-                    ${teacher.nama}
-                </h3>
-
-                <p class="text-xs text-blue-600 mb-4">
-                    ${teacher.lembaga}
-                </p>
-
-                <p id="rec-${i}" class="text-sm text-gray-500 italic">
-                    Menganalisis...
-                </p>
-            `;
-
-            container.appendChild(card);
-
-            const prompt =
-                `Guru ${teacher.nama} dari ${teacher.lembaga}. Data: ${teacher.details.join(", ")}. Berikan rekomendasi singkat positif.`;
-
-            const result =
-                await callGemini(prompt, fallback);
-
-            document.getElementById(`rec-${i}`).innerText =
-                result;
-
-            // DELAY
-            await new Promise(r => setTimeout(r, 1500));
+            `).join('');
         }
-    }
 
-    // =========================
-    // MENU
-    // =========================
-    function switchMenu(menu) {
+        async function renderRecommendations() {
+            const container = document.getElementById('recommendation-container');
+            const filterValue = document.getElementById('school-filter').value;
+            
+            let filteredData = filterValue === 'all' 
+                ? realData.slice(-10) 
+                : realData.filter(d => d.lembaga === filterValue);
 
-        document.getElementById('section-home')
-            .classList.add('hidden');
+            const displayData = [...filteredData].reverse();
 
-        document.getElementById('section-schools')
-            .classList.add('hidden');
+            if (displayData.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400 italic">Belum ada data tersedia.</div>`;
+                return;
+            }
 
-        document.getElementById('section-recommendations')
-            .classList.add('hidden');
+            container.innerHTML = displayData.map((t, idx) => `
+                <div id="rec-card-${idx}" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm animate-slide flex flex-col h-full border-t-4 border-t-blue-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-black text-gray-800 leading-tight">${t.nama}</h3>
+                            <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wide">${t.lembaga}</p>
+                        </div>
+                        <span class="bg-blue-50 text-blue-600 p-2 rounded-xl text-xs font-black">AI</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-4 flex-grow border border-gray-100">
+                        <p id="rec-text-${idx}" class="text-sm text-gray-500 italic loading-pulse">Menganalisis indikator individu...</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-dashed border-gray-200 flex justify-between items-center">
+                         <span class="text-[9px] text-gray-400 font-bold uppercase">Hasil Rekomendasi</span>
+                         <span class="text-[9px] text-indigo-500 font-black">${t.details.length} Data Terolah</span>
+                    </div>
+                </div>
+            `).join('');
 
-        document.getElementById(`section-${menu}`)
-            .classList.remove('hidden');
+            for(let i = 0; i < displayData.length; i++) {
+                const teacher = displayData[i];
+                const textEl = document.getElementById(`rec-text-${i}`);
+                
+                // Logika pemilihan teks statis acak berbasis indeks agar tidak berubah-ubah saat reload tapi tetap variatif per orang
+                const variantIdx = (teacher.nama.length + i) % VARIANT_TEXTS.length;
+                const dynamicFallback = VARIANT_TEXTS[variantIdx]
+                    .replace("{nama}", teacher.nama)
+                    .replace("{lembaga}", teacher.lembaga);
 
-        if (menu === 'recommendations') {
-            renderRecommendations();
+                if (teacher.details.length === 0) {
+                    textEl.innerText = `Data instrumen Bapak/Ibu ${teacher.nama} sedang dalam pemrosesan awal. Silakan lengkapi seluruh isian untuk hasil analisis AI yang lebih tajam.`;
+                    textEl.classList.remove('loading-pulse');
+                    continue;
+                }
+
+                const prompt = `Guru: ${teacher.nama}. Lembaga: ${teacher.lembaga}. Data: "${teacher.details.join(" | ")}". Berikan 2 kalimat rekomendasi positif yang sangat spesifik dan variatif.`;
+                
+                const recommendation = await callGemini(prompt, dynamicFallback);
+                
+                if (textEl) {
+                    textEl.innerText = recommendation;
+                    textEl.classList.remove('loading-pulse', 'text-gray-500');
+                    textEl.classList.add('text-gray-700', 'not-italic');
+                }
+            }
         }
-    }
 
-    // =========================
-    // START
-    // =========================
-    fetchData();
+        async function generateStrategicAdvice() {
+            if (isProcessingAI) return;
+            isProcessingAI = true;
 
-</script>
-```</body>
+            const textEl = document.getElementById('ai-insight-text');
+            textEl.className = "text-sm text-indigo-400 italic loading-pulse";
+            textEl.innerText = "✨ AI sedang mengevaluasi tren partisipasi...";
+
+            const stats = {};
+            realData.forEach(d => stats[d.lembaga] = (stats[d.lembaga] || 0) + 1);
+            const schoolSummary = Object.entries(stats).map(([k,v]) => `${k}: ${v}`).join(", ");
+
+            const prompt = `Total responden ${realData.length}. Data lembaga: ${schoolSummary}. Berikan 1 kalimat evaluasi strategis singkat untuk Pengawas tentang tingkat partisipasi ini.`;
+            const result = await callGemini(prompt, "Partisipasi aktif terdeteksi. Fokuskan penguatan pada lembaga yang jumlah respondennya masih di bawah rata-rata untuk menjamin validitas data.");
+            
+            textEl.className = "text-sm text-gray-700 leading-relaxed italic animate-slide";
+            textEl.innerText = result;
+            isProcessingAI = false;
+        }
+
+        function switchMenu(menu) {
+            document.getElementById('section-home').classList.add('hidden');
+            document.getElementById('section-schools').classList.add('hidden');
+            document.getElementById('section-recommendations').classList.add('hidden');
+            
+            document.getElementById(`section-${menu}`).classList.remove('hidden');
+
+            ['home', 'schools', 'recommendations'].forEach(m => {
+                const el = document.getElementById(`menu-${m}`);
+                if(el) {
+                    if(m === menu) {
+                        el.className = "w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg transition-all sidebar-active";
+                    } else {
+                        el.className = "w-full flex items-center px-4 py-3 text-sm font-bold text-gray-500 rounded-lg transition-all hover:bg-gray-50";
+                    }
+                }
+            });
+
+            if(menu === 'schools') renderSchoolDirectory();
+            if(menu === 'recommendations') renderRecommendations();
+        }
+
+        function renderSchoolDirectory() {
+            const stats = {};
+            realData.forEach(d => stats[d.lembaga] = (stats[d.lembaga] || 0) + 1);
+            document.getElementById('school-directory').innerHTML = Object.keys(stats).sort().map(s => `
+                <div onclick="openSchoolModal('${s}')" class="p-5 flex justify-between items-center hover:bg-blue-50 cursor-pointer border-b border-gray-50 transition-colors group">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">${s}</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase mt-1">Klik rincian partisipan</span>
+                    </div>
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-black group-hover:bg-blue-600 group-hover:text-white transition-all">${stats[s]} GURU</span>
+                </div>
+            `).join('');
+        }
+
+        function openSchoolModal(school) {
+            const modal = document.getElementById('guru-modal');
+            const listEl = document.getElementById('modal-teacher-list');
+            
+            document.getElementById('modal-school-name').innerText = school;
+            const teachers = realData.filter(d => d.lembaga === school);
+            document.getElementById('modal-school-count').innerText = `${teachers.length} Guru terdaftar`;
+            
+            listEl.innerHTML = teachers.map((t, i) => `
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 font-bold text-sm text-gray-700 shadow-sm animate-slide">
+                    ${i+1}. ${t.nama}
+                </div>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('guru-modal').classList.add('hidden'); }
+        
+        fetchData();
+        setInterval(fetchData, 120000); 
+    </script>
+</body>
 </html>
+

@@ -132,41 +132,34 @@
         let isProcessingAI = false;
 
         async function callGemini(prompt) {
-            if (!apiKey) return "API Key belum terpasang.";
+            if (!apiKey) return "API Key belum terpasang di baris 156.";
             
-            // Ganti ke model yang lebih stabil: gemini-1.5-flash
+            // Menggunakan endpoint v1beta untuk stabilitas lebih baik di free tier
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             
-            let delay = 1500;
-            for (let i = 0; i < 3; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: { maxOutputTokens: 150, temperature: 0.7 }
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.candidates?.[0]?.content?.parts?.[0]?.text || "AI sedang berpikir...";
-                    }
-                    
-                    if (response.status === 429) { 
-                        await new Promise(r => setTimeout(r, delay));
-                        delay *= 2;
-                        continue;
-                    }
-                    
-                    const errData = await response.json();
-                    console.error("API Error Detail:", errData);
-                } catch (e) {
-                    console.error("Fetch Error:", e);
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { maxOutputTokens: 100, temperature: 0.5 }
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "AI sedang berpikir...";
+                } else {
+                    const errorJson = await response.json();
+                    console.error("Detail Error Gemini:", errorJson);
+                    // Menampilkan kode error agar mudah di-debug
+                    return `Gagal (Error ${response.status}): ${errorJson.error?.message || 'Cek console browser'}`;
                 }
+            } catch (e) {
+                console.error("Network Error:", e);
+                return "Gagal terhubung ke server Google. Cek koneksi internet.";
             }
-            return "Koneksi AI sedang padat. Silakan coba muat ulang halaman.";
         }
 
         async function fetchData() {
@@ -220,10 +213,10 @@
 
             const insightEl = document.getElementById('ai-insight-text');
             insightEl.className = "text-sm text-gray-400 italic loading-pulse";
-            insightEl.innerText = "AI sedang menganalisis data terbaru...";
+            insightEl.innerText = "AI sedang menganalisis data...";
 
-            const samples = realData.slice(-5).map(d => `${d.nama} (${d.lembaga})`).join(", ");
-            const prompt = `Data survei monitoring Prof Ma'ruf: Total ${realData.length} responden. Baru saja masuk: ${samples}. Berikan satu analisis singkat tren partisipasi dan apresiasi dalam 1 kalimat Bahasa Indonesia yang formal dan memotivasi.`;
+            const samples = realData.slice(-3).map(d => `${d.nama} (${d.lembaga})`).join(", ");
+            const prompt = `Singkat saja: Total ${realData.length} responden. Terbaru: ${samples}. Berikan 1 kalimat apresiasi formal Bahasa Indonesia.`;
 
             const result = await callGemini(prompt);
             insightEl.className = "text-sm text-gray-600 leading-relaxed italic animate-slide";
@@ -265,17 +258,17 @@
             `).join('');
             
             const tipEl = document.getElementById('modal-ai-tip');
-            tipEl.innerText = "AI sedang menyapa guru " + school + "...";
+            tipEl.innerText = "Meminta pesan AI...";
             document.getElementById('guru-modal').classList.remove('hidden');
 
-            const res = await callGemini(`Tulis 1 kalimat ucapan terima kasih singkat yang memotivasi untuk guru-guru di ${school} yang sudah mengisi survei pendidikan. Bahasa Indonesia yang sopan.`);
+            const res = await callGemini(`Tulis 1 kalimat ucapan terima kasih singkat untuk guru-guru di ${school} dalam Bahasa Indonesia yang sopan.`);
             tipEl.innerText = "✨ " + res;
         }
 
         function closeModal() { document.getElementById('guru-modal').classList.add('hidden'); }
         
         fetchData();
-        setInterval(fetchData, 30000); // Sinkronisasi tiap 30 detik agar tidak terkena rate limit
+        setInterval(fetchData, 45000); // Sinkronisasi tiap 45 detik agar lebih aman dari limit
     </script>
 </body>
 </html>

@@ -203,7 +203,9 @@
 
         let realData = [];
         let currentMenu = 'home';
-        const apiKey = "AIzaSyAOk6iME5n4hHBctyyY1xNiD8MkyKdfdLA"; // API Key disediakan oleh environment
+        
+        // PETUNJUK: Masukkan API Key Google AI Studio Anda di sini agar fitur AI berfungsi di server publik.
+        const apiKey = "AIzaSyAOk6iME5n4hHBctyyY1xNiD8MkyKdfdLA"; 
 
         // Navigasi Menu
         function switchMenu(menu) {
@@ -252,6 +254,11 @@
 
         async function generateMotivator(school, count) {
             const aiNoteEl = document.getElementById('modal-ai-note');
+            if (!apiKey) {
+                aiNoteEl.innerText = "Terus semangat! (API Key belum dikonfigurasi)";
+                return;
+            }
+
             const prompt = `Lembaga ${school} memiliki ${count} guru yang sudah mengisi angket motivasi. Berikan satu kalimat apresiasi yang sangat inspiratif dan hangat khusus untuk para guru ini dalam Bahasa Indonesia.`;
             
             try {
@@ -267,8 +274,12 @@
             document.body.style.overflow = 'auto'; 
         }
 
-        // Gemini API Wrapper
+        // Gemini API Wrapper dengan penanganan error lebih baik
         async function callGemini(prompt, systemInstruction = "Kamu adalah asisten pintar untuk dashboard monitoring pendidikan.") {
+            if (!apiKey) {
+                throw new Error("API_KEY_MISSING");
+            }
+
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
             let retries = 0;
@@ -284,14 +295,21 @@
                             systemInstruction: { parts: [{ text: systemInstruction }] }
                         })
                     });
+                    
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error?.message || "HTTP_ERROR");
+                    }
+
                     const result = await response.json();
                     return result.candidates?.[0]?.content?.parts?.[0]?.text || "Gagal memproses data.";
                 } catch (e) {
+                    if (e.message === "API_KEY_INVALID" || e.message.includes("key")) throw e;
                     retries++;
                     await new Promise(r => setTimeout(r, Math.pow(2, retries) * 1000));
                 }
             }
-            throw new Error("API Limit Reached");
+            throw new Error("API_LIMIT_OR_NETWORK_ERROR");
         }
 
         // Data Fetching
@@ -390,6 +408,11 @@
         async function getAIAnalysis() {
             const btn = document.getElementById('ai-analyze-btn');
             const aiBox = document.getElementById('ai-response');
+            
+            if (!apiKey) {
+                aiBox.innerHTML = "<span class='text-red-500 font-bold'>Error: API Key Google belum diisi di dalam kode.</span>";
+                return;
+            }
             if (realData.length === 0) return;
 
             btn.disabled = true;
@@ -403,7 +426,7 @@
                 const text = await callGemini(prompt);
                 aiBox.innerText = text;
             } catch (e) {
-                aiBox.innerText = "Gagal memanggil AI. Silakan coba lagi.";
+                aiBox.innerText = "Gagal memanggil AI: " + e.message;
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `✨ Analisis Cepat`;
@@ -414,6 +437,11 @@
         async function getAIPrediction() {
             const btn = document.getElementById('ai-predict-btn');
             const predictBox = document.getElementById('ai-prediction');
+            
+            if (!apiKey) {
+                predictBox.innerHTML = "<span class='text-red-500 font-bold'>Error: API Key belum diisi.</span>";
+                return;
+            }
             if (realData.length === 0) return;
 
             btn.disabled = true;
@@ -427,7 +455,7 @@
                 const text = await callGemini(prompt);
                 predictBox.innerText = text;
             } catch (e) {
-                predictBox.innerText = "Gagal melakukan prediksi saat ini.";
+                predictBox.innerText = "Gagal memanggil AI: " + e.message;
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `✨ Prediksi Tren`;

@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Monitoring Real-time</title>
+    <title>Dashboard Monitoring Survei ASN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
         .animate-slide { animation: slideIn 0.3s ease-out forwards; }
-        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
         .sidebar-active { background-color: #eff6ff; color: #2563eb; border-right: 4px solid #2563eb; }
-        
-        /* Modal Custom Scrollbar */
         .modal-scroll::-webkit-scrollbar { width: 6px; }
         .modal-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
         .modal-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -33,7 +26,7 @@
                 <div class="flex items-center space-x-3 mb-8">
                     <div class="bg-blue-600 p-2 rounded-lg">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
                     <h1 class="text-xl font-bold text-gray-800 tracking-tight">E-Monitoring</h1>
@@ -45,17 +38,10 @@
                         Beranda
                     </button>
                     <button onclick="switchMenu('schools')" id="menu-schools" class="w-full flex items-center px-4 py-3 text-sm font-bold text-gray-500 rounded-lg transition-all hover:bg-gray-50">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                         Data Lembaga
                     </button>
                 </nav>
-            </div>
-            
-            <div class="mt-auto p-6 border-t border-gray-100 hidden md:block">
-                <div id="status-indicator" class="flex items-center text-xs font-bold text-green-600 bg-green-50 p-3 rounded-xl border border-green-100">
-                    <span id="live-dot" class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                    Live Sinkronisasi
-                </div>
             </div>
         </aside>
 
@@ -75,64 +61,35 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-black text-gray-800">Daftar Pengisi Real-time</h2>
-                        <p class="text-gray-500 text-sm font-medium">Data terbaru berdasarkan Kolom C (Nama) & Kolom D (Lembaga)</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="ai-analyze-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center">
-                            ✨ Analisis Cepat
-                        </button>
-                        <button id="ai-predict-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-emerald-200 transition-all active:scale-95 flex items-center">
-                            ✨ Prediksi Tren
-                        </button>
-                    </div>
-                </div>
-
+                <!-- Statistik Utama -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-white">
-                    <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-3xl shadow-blue-200 shadow-xl">
-                        <p class="text-blue-100 text-xs font-bold uppercase tracking-wider mb-1">Total Responden</p>
+                    <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-3xl shadow-xl">
+                        <p class="text-blue-100 text-xs font-bold uppercase mb-1">Total Responden</p>
                         <h3 id="total-count" class="text-4xl font-black">0</h3>
                     </div>
-                    <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-3xl shadow-indigo-200 shadow-xl">
-                        <p class="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Total Lembaga</p>
+                    <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-3xl shadow-xl">
+                        <p class="text-indigo-100 text-xs font-bold uppercase mb-1">Total Lembaga</p>
                         <h3 id="school-count" class="text-4xl font-black">0</h3>
                     </div>
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-gray-800">
-                        <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Update Terakhir</p>
+                        <p class="text-gray-400 text-xs font-bold uppercase mb-1">Update Terakhir</p>
                         <h3 id="last-update" class="text-2xl font-black text-blue-600 tracking-tight">--:--</h3>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2">
-                        <div id="participant-list" class="space-y-4">
-                            <div class="bg-white p-12 rounded-3xl border-2 border-dashed border-gray-200 text-center text-gray-400">
-                                Sedang mengambil data...
-                            </div>
+                        <h2 class="text-xl font-black text-gray-800 mb-4">Pengisi Terbaru</h2>
+                        <div id="participant-list" class="space-y-3">
+                            <!-- Data Pengisi -->
                         </div>
                     </div>
-                    <div class="lg:col-span-1 space-y-6">
-                        <!-- AI Analysis Box -->
-                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                            <h4 class="text-gray-800 font-bold mb-4 flex items-center">
-                                <span class="bg-indigo-100 p-1.5 rounded-lg mr-2 text-indigo-600">🤖</span>
-                                AI Insight ✨
-                            </h4>
-                            <div id="ai-response" class="text-sm text-gray-600 leading-relaxed bg-gray-50 p-5 rounded-2xl border border-gray-100 italic">
-                                Klik tombol di atas untuk mendapatkan analisis data saat ini.
-                            </div>
-                        </div>
-
-                        <!-- AI Prediction Box -->
-                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                            <h4 class="text-gray-800 font-bold mb-4 flex items-center">
-                                <span class="bg-emerald-100 p-1.5 rounded-lg mr-2 text-emerald-600">📈</span>
-                                AI Prediksi ✨
-                            </h4>
-                            <div id="ai-prediction" class="text-sm text-gray-600 leading-relaxed bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                                Analisis beban pendaftaran akan muncul di sini.
+                    
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm sticky top-8">
+                            <h2 class="text-xl font-black text-gray-800 mb-6">Top Kontribusi</h2>
+                            <div id="top-schools" class="space-y-4">
+                                <!-- Ranking Sekolah -->
                             </div>
                         </div>
                     </div>
@@ -141,335 +98,164 @@
 
             <!-- SECTION DATA LEMBAGA -->
             <section id="section-schools" class="hidden animate-slide">
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 class="text-2xl font-black text-gray-800">Direktori Lembaga</h2>
-                        <p class="text-gray-500 text-sm font-medium">Klik pada nama lembaga untuk melihat daftar guru dan analisis AI per sekolah</p>
-                    </div>
+                <div class="mb-8">
+                    <h2 class="text-2xl font-black text-gray-800">Direktori Lembaga</h2>
+                    <p class="text-gray-500 text-sm font-medium">Daftar lengkap lembaga dan jumlah partisipasi guru</p>
                 </div>
 
-                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden max-w-4xl">
-                    <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-700 uppercase text-xs tracking-widest">Lembaga Terdaftar</h3>
-                        <span id="school-total-label" class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-black">0 TOTAL</span>
-                    </div>
-                    <div id="school-directory" class="divide-y divide-gray-50 max-h-[60vh] overflow-y-auto modal-scroll">
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div id="school-directory" class="divide-y divide-gray-50">
                         <!-- List Lembaga -->
                     </div>
                 </div>
             </section>
-
         </main>
     </div>
 
-    <!-- MODAL POPUP GURU -->
-    <div id="guru-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden transform transition-all scale-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-600 text-white">
+    <!-- MODAL DAFTAR GURU -->
+    <div id="guru-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">
+            <div class="p-6 bg-blue-600 text-white flex justify-between items-center">
                 <div>
-                    <h3 id="modal-school-name" class="text-lg font-black leading-tight">Nama Lembaga</h3>
-                    <p id="modal-school-count" class="text-blue-100 text-xs font-medium">0 Guru sudah mengisi</p>
+                    <h3 id="modal-school-name" class="text-lg font-black leading-tight italic">Nama Sekolah</h3>
+                    <p id="modal-school-count" class="text-blue-100 text-xs">0 Guru terdata</p>
                 </div>
-                <button onclick="closeModal()" class="p-2 hover:bg-white/20 rounded-full transition-colors">
+                <button onclick="closeModal()" class="p-2 hover:bg-white/20 rounded-full">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            
-            <div class="p-6 bg-indigo-50 border-b border-indigo-100">
-                <div class="flex items-start gap-3">
-                    <div class="bg-white p-2 rounded-xl shadow-sm">✨</div>
-                    <div>
-                        <h4 class="text-xs font-black text-indigo-600 uppercase tracking-widest mb-1">AI Motivator</h4>
-                        <p id="modal-ai-note" class="text-xs text-indigo-800 italic leading-relaxed">
-                            Menganalisis profil pendaftar...
-                        </p>
-                    </div>
-                </div>
+            <div id="modal-teacher-list" class="p-4 space-y-2 max-h-[60vh] overflow-y-auto modal-scroll bg-gray-50">
+                <!-- Nama-nama guru -->
             </div>
-
-            <div id="modal-teacher-list" class="p-4 space-y-2 max-h-[40vh] overflow-y-auto modal-scroll bg-gray-50">
-                <!-- List Guru di Modal -->
-            </div>
-            <div class="p-4 border-t border-gray-100 text-center">
-                <button onclick="closeModal()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-2xl transition-all">Tutup Jendela</button>
+            <div class="p-4 border-t border-gray-100">
+                <button onclick="closeModal()" class="w-full py-3 bg-gray-100 font-bold rounded-2xl">Tutup</button>
             </div>
         </div>
     </div>
 
     <script>
         const sheetId = '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k';
-        const sheetName = 'Sheet1'; 
-        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
 
         let realData = [];
-        let currentMenu = 'home';
-        
-        // PETUNJUK: Masukkan API Key Google AI Studio Anda di sini agar fitur AI berfungsi di server publik.
-        const apiKey = "AIzaSyAOk6iME5n4hHBctyyY1xNiD8MkyKdfdLA"; 
 
-        // Navigasi Menu
         function switchMenu(menu) {
-            currentMenu = menu;
             document.getElementById('section-home').classList.toggle('hidden', menu !== 'home');
             document.getElementById('section-schools').classList.toggle('hidden', menu !== 'schools');
-            
-            document.getElementById('menu-home').className = `w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg transition-all ${menu === 'home' ? 'sidebar-active' : 'text-gray-500 hover:bg-gray-50'}`;
-            document.getElementById('menu-schools').className = `w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg transition-all ${menu === 'schools' ? 'sidebar-active' : 'text-gray-500 hover:bg-gray-50'}`;
-            
+            document.getElementById('menu-home').className = `w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg ${menu === 'home' ? 'sidebar-active' : 'text-gray-500 hover:bg-gray-50'}`;
+            document.getElementById('menu-schools').className = `w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg ${menu === 'schools' ? 'sidebar-active' : 'text-gray-500 hover:bg-gray-50'}`;
             if (menu === 'schools') renderSchoolDirectory();
         }
 
-        // Modal Functions
-        async function openModal(schoolName) {
-            const modal = document.getElementById('guru-modal');
-            const nameEl = document.getElementById('modal-school-name');
-            const countEl = document.getElementById('modal-school-count');
-            const listEl = document.getElementById('modal-teacher-list');
-            const aiNoteEl = document.getElementById('modal-ai-note');
-            
-            const teachers = realData.filter(d => d.lembaga === schoolName);
-            
-            nameEl.innerText = schoolName;
-            countEl.innerText = `${teachers.length} Guru sudah mengisi angket`;
-            aiNoteEl.innerText = "Membuat pesan apresiasi khusus untuk guru-guru ini...";
-            
-            listEl.innerHTML = '';
-            teachers.forEach((t, index) => {
-                const item = document.createElement('div');
-                item.className = "bg-white p-4 rounded-xl border border-gray-200 flex items-center space-x-3 shadow-sm animate-slide";
-                item.style.animationDelay = `${index * 0.05}s`;
-                item.innerHTML = `
-                    <div class="text-xs font-black text-blue-400 bg-blue-50 w-6 h-6 flex items-center justify-center rounded-lg">${index + 1}</div>
-                    <div class="font-bold text-gray-800">${t.nama}</div>
-                `;
-                listEl.appendChild(item);
-            });
-
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; 
-
-            // AI Call for Motivator
-            generateMotivator(schoolName, teachers.length);
-        }
-
-        async function generateMotivator(school, count) {
-            const aiNoteEl = document.getElementById('modal-ai-note');
-            if (!apiKey) {
-                aiNoteEl.innerText = "Terus semangat! (API Key belum dikonfigurasi)";
-                return;
-            }
-
-            const prompt = `Lembaga ${school} memiliki ${count} guru yang sudah mengisi angket motivasi. Berikan satu kalimat apresiasi yang sangat inspiratif dan hangat khusus untuk para guru ini dalam Bahasa Indonesia.`;
-            
-            try {
-                const text = await callGemini(prompt);
-                aiNoteEl.innerText = text;
-            } catch (e) {
-                aiNoteEl.innerText = "Terus semangat dalam mendidik generasi bangsa!";
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('guru-modal').classList.add('hidden');
-            document.body.style.overflow = 'auto'; 
-        }
-
-        // Gemini API Wrapper dengan penanganan error lebih baik
-        async function callGemini(prompt, systemInstruction = "Kamu adalah asisten pintar untuk dashboard monitoring pendidikan.") {
-            if (!apiKey) {
-                throw new Error("API_KEY_MISSING");
-            }
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
-            let retries = 0;
-            const maxRetries = 5;
-            
-            while (retries < maxRetries) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            systemInstruction: { parts: [{ text: systemInstruction }] }
-                        })
-                    });
-                    
-                    if (!response.ok) {
-                        const errData = await response.json();
-                        throw new Error(errData.error?.message || "HTTP_ERROR");
-                    }
-
-                    const result = await response.json();
-                    return result.candidates?.[0]?.content?.parts?.[0]?.text || "Gagal memproses data.";
-                } catch (e) {
-                    if (e.message === "API_KEY_INVALID" || e.message.includes("key")) throw e;
-                    retries++;
-                    await new Promise(r => setTimeout(r, Math.pow(2, retries) * 1000));
-                }
-            }
-            throw new Error("API_LIMIT_OR_NETWORK_ERROR");
-        }
-
-        // Data Fetching
         async function fetchData() {
             try {
                 const response = await fetch(csvUrl);
                 const csvText = await response.text();
-                
-                const rows = csvText.split('\n').map(row => {
-                    return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"(.*)"$/, '$1'));
-                });
+                const rows = csvText.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"(.*)"$/, '$1')));
 
                 const newData = [];
                 for (let i = 1; i < rows.length; i++) {
                     if (rows[i][2] && rows[i][2].trim() !== "") {
                         newData.push({
-                            id: i,
                             nama: rows[i][2], 
                             lembaga: rows[i][3] || "Tanpa Lembaga",
-                            waktu: rows[i][0] || "Baru"
+                            waktu: rows[i][0]
                         });
                     }
                 }
-
                 realData = newData;
-                updateStats();
-                if (currentMenu === 'home') renderHomeList();
-                if (currentMenu === 'schools') renderSchoolDirectory();
-            } catch (error) {
-                console.error("Fetch error:", error);
-            }
+                updateUI();
+            } catch (e) { console.error("Error fetching data"); }
         }
 
-        function updateStats() {
+        function updateUI() {
             document.getElementById('total-count').innerText = realData.length;
-            const uniqueSchools = new Set(realData.map(d => d.lembaga)).size;
-            document.getElementById('school-count').innerText = uniqueSchools;
-            document.getElementById('school-total-label').innerText = `${uniqueSchools} TOTAL LEMBAGA`;
-            document.getElementById('last-update').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const schoolsMap = {};
+            realData.forEach(d => { schoolsMap[d.lembaga] = (schoolsMap[d.lembaga] || 0) + 1; });
+            
+            const uniqueSchools = Object.keys(schoolsMap);
+            document.getElementById('school-count').innerText = uniqueSchools.length;
+            document.getElementById('last-update').innerText = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+
+            renderHomeList();
+            renderTopSchools(schoolsMap);
         }
 
         function renderHomeList() {
-            const listContainer = document.getElementById('participant-list');
-            listContainer.innerHTML = '';
-            
-            [...realData].reverse().slice(0, 50).forEach(p => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center animate-slide hover:shadow-md transition-all";
-                card.innerHTML = `
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-black text-xl">
-                            ${p.nama.charAt(0).toUpperCase()}
-                        </div>
+            const container = document.getElementById('participant-list');
+            container.innerHTML = '';
+            [...realData].reverse().slice(0, 15).forEach(p => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 font-bold">${p.nama.charAt(0)}</div>
                         <div>
-                            <h4 class="font-bold text-gray-800 leading-tight">${p.nama}</h4>
-                            <p class="text-xs font-bold text-gray-400 uppercase mt-0.5 tracking-tight">${p.lembaga}</p>
+                            <div class="font-bold text-gray-800">${p.nama}</div>
+                            <div class="text-[10px] text-gray-400 font-bold uppercase">${p.lembaga}</div>
                         </div>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] font-black bg-gray-100 text-gray-400 px-3 py-1 rounded-full uppercase">
-                            ${p.waktu.includes('/') ? p.waktu.split(' ')[1] || p.waktu : p.waktu}
-                        </span>
                     </div>
                 `;
-                listContainer.appendChild(card);
+                container.appendChild(div);
+            });
+        }
+
+        function renderTopSchools(map) {
+            const container = document.getElementById('top-schools');
+            container.innerHTML = '';
+            const sorted = Object.entries(map).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            
+            sorted.forEach(([name, count]) => {
+                const percentage = Math.round((count / realData.length) * 100);
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="truncate pr-2">${name}</span>
+                        <span>${count} Guru</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="bg-blue-600 h-full" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(div);
             });
         }
 
         function renderSchoolDirectory() {
-            const dirContainer = document.getElementById('school-directory');
-            const schools = [...new Set(realData.map(d => d.lembaga))].sort();
+            const container = document.getElementById('school-directory');
+            container.innerHTML = '';
+            const schoolsMap = {};
+            realData.forEach(d => { schoolsMap[d.lembaga] = (schoolsMap[d.lembaga] || 0) + 1; });
             
-            dirContainer.innerHTML = '';
-            schools.forEach(school => {
-                const count = realData.filter(d => d.lembaga === school).length;
-                const item = document.createElement('div');
-                item.className = "p-5 flex justify-between items-center hover:bg-blue-50 cursor-pointer transition-all group border-l-4 border-l-transparent hover:border-l-blue-600";
-                item.onclick = () => openModal(school);
-                item.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="font-black text-gray-800 group-hover:text-blue-700 transition-colors">${school}</span>
-                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Klik untuk detail guru</span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="bg-gray-100 text-gray-500 text-xs font-black px-4 py-1.5 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all">
-                            ${count} Guru
-                        </span>
-                        <svg class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </div>
+            Object.keys(schoolsMap).sort().forEach(school => {
+                const div = document.createElement('div');
+                div.className = "p-4 flex justify-between items-center hover:bg-blue-50 cursor-pointer transition-all";
+                div.onclick = () => openModal(school);
+                div.innerHTML = `
+                    <div class="font-bold text-gray-700">${school}</div>
+                    <div class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-black">${schoolsMap[school]} GURU</div>
                 `;
-                dirContainer.appendChild(item);
+                container.appendChild(div);
             });
         }
 
-        // AI Feature: Quick Analysis
-        async function getAIAnalysis() {
-            const btn = document.getElementById('ai-analyze-btn');
-            const aiBox = document.getElementById('ai-response');
+        function openModal(school) {
+            document.getElementById('modal-school-name').innerText = school;
+            const teachers = realData.filter(d => d.lembaga === school);
+            document.getElementById('modal-school-count').innerText = `${teachers.length} Guru terdata`;
             
-            if (!apiKey) {
-                aiBox.innerHTML = "<span class='text-red-500 font-bold'>Error: API Key Google belum diisi di dalam kode.</span>";
-                return;
-            }
-            if (realData.length === 0) return;
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="animate-pulse">✨ Menganalisis...</span>`;
-            aiBox.innerHTML = `<div class="animate-pulse flex space-x-2"><div class="h-2 w-2 bg-gray-300 rounded-full"></div><div class="h-2 w-2 bg-gray-300 rounded-full"></div></div>`;
-
-            const summary = realData.slice(0, 15).map(p => `${p.nama} (${p.lembaga})`).join(", ");
-            const prompt = `Data masuk: ${summary}. Identifikasi lembaga dengan peserta terbanyak dan berikan ringkasan singkat profil peserta yang mendaftar dalam 2 kalimat saja. Gunakan gaya bahasa profesional namun ramah.`;
-
-            try {
-                const text = await callGemini(prompt);
-                aiBox.innerText = text;
-            } catch (e) {
-                aiBox.innerText = "Gagal memanggil AI: " + e.message;
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `✨ Analisis Cepat`;
-            }
+            const list = document.getElementById('modal-teacher-list');
+            list.innerHTML = '';
+            teachers.forEach((t, i) => {
+                const item = document.createElement('div');
+                item.className = "bg-white p-3 rounded-xl border border-gray-200 font-bold text-sm text-gray-700";
+                item.innerText = `${i+1}. ${t.nama}`;
+                list.appendChild(item);
+            });
+            document.getElementById('guru-modal').classList.remove('hidden');
         }
 
-        // AI Feature: Trend Prediction
-        async function getAIPrediction() {
-            const btn = document.getElementById('ai-predict-btn');
-            const predictBox = document.getElementById('ai-prediction');
-            
-            if (!apiKey) {
-                predictBox.innerHTML = "<span class='text-red-500 font-bold'>Error: API Key belum diisi.</span>";
-                return;
-            }
-            if (realData.length === 0) return;
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="animate-pulse">✨ Memprediksi...</span>`;
-            predictBox.innerHTML = `<div class="animate-pulse flex space-x-2"><div class="h-2 w-2 bg-gray-300 rounded-full"></div><div class="h-2 w-2 bg-gray-300 rounded-full"></div></div>`;
-
-            const timestamps = realData.slice(-20).map(p => p.waktu).join(", ");
-            const prompt = `Berdasarkan urutan waktu pendaftaran berikut: ${timestamps}. Prediksikan apakah pendaftaran akan meningkat atau menurun dalam 24 jam ke depan, serta jelaskan alasannya secara logis dalam 2 kalimat.`;
-
-            try {
-                const text = await callGemini(prompt);
-                predictBox.innerText = text;
-            } catch (e) {
-                predictBox.innerText = "Gagal memanggil AI: " + e.message;
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `✨ Prediksi Tren`;
-            }
-        }
-
-        // Close modal on click outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('guru-modal');
-            if (event.target == modal) closeModal();
-        }
-
-        document.getElementById('ai-analyze-btn').onclick = getAIAnalysis;
-        document.getElementById('ai-predict-btn').onclick = getAIPrediction;
+        function closeModal() { document.getElementById('guru-modal').classList.add('hidden'); }
 
         fetchData();
         setInterval(fetchData, 10000);

@@ -40,12 +40,12 @@
                     </button>
                 </nav>
 
-                <div class="mt-10 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                    <div class="flex items-center text-blue-700 mb-1">
-                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
-                        <span class="text-[10px] font-black uppercase">System Online</span>
+                <div class="mt-10 p-4 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg border border-blue-400">
+                    <div class="flex items-center text-white mb-2">
+                        <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                        <span class="text-[10px] font-black uppercase tracking-widest">AI Supercharged ✨</span>
                     </div>
-                    <p class="text-[9px] text-blue-600 leading-tight italic">Sistem memantau partisipasi secara real-time untuk kemajuan bersama.</p>
+                    <p class="text-[10px] text-blue-100 leading-tight italic">Menganalisis tren partisipasi secara otomatis menggunakan teknologi Gemini.</p>
                 </div>
             </div>
         </aside>
@@ -66,14 +66,21 @@
                         <h3 id="total-count" class="text-4xl font-black">0</h3>
                     </div>
 
-                    <div class="md:col-span-2 bg-white p-6 rounded-3xl border border-indigo-100 shadow-sm">
-                        <div class="flex items-center mb-3">
-                            <span class="bg-indigo-100 p-1.5 rounded-lg mr-2 text-indigo-600">💡</span>
-                            <h4 class="font-bold text-gray-800">Pesan Motivasi Hari Ini</h4>
+                    <div class="md:col-span-2 bg-white p-6 rounded-3xl border border-indigo-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <span id="ai-status-icon" class="bg-indigo-100 p-1.5 rounded-lg mr-2 text-indigo-600">✨</span>
+                                    <h4 class="font-bold text-gray-800">Analisis Strategis ✨</h4>
+                                </div>
+                                <button onclick="generateStrategicAdvice()" class="text-[10px] bg-indigo-600 text-white px-3 py-1 rounded-full font-bold hover:bg-indigo-700 transition-colors">
+                                    ✨ Buat Rekomendasi
+                                </button>
+                            </div>
+                            <p id="ai-insight-text" class="text-sm text-gray-600 leading-relaxed italic min-h-[3rem]">
+                                Klik tombol untuk mendapatkan rekomendasi strategis berdasarkan data terbaru.
+                            </p>
                         </div>
-                        <p id="motivation-text" class="text-sm text-gray-600 leading-relaxed italic min-h-[3rem]">
-                            Memuat inspirasi pendidikan...
-                        </p>
                     </div>
                 </div>
 
@@ -111,8 +118,13 @@
                 <h3 id="modal-school-name" class="text-lg font-black leading-tight italic">Nama Sekolah</h3>
                 <p id="modal-school-count" class="text-blue-100 text-xs mt-1">0 Guru terdata</p>
             </div>
-            <div class="p-4 bg-indigo-50 border-b border-indigo-100 text-[11px] text-indigo-700 font-bold italic shrink-0">
-                Apresiasi untuk semangat dedikasi Bapak/Ibu Guru.
+            <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between shrink-0">
+                <p id="modal-ai-tip" class="text-[11px] text-indigo-700 font-bold italic pr-2">
+                    Siap memberikan apresiasi cerdas...
+                </p>
+                <button onclick="regenerateSchoolTip()" id="btn-modal-ai" class="shrink-0 bg-white p-1.5 rounded-lg shadow-sm text-indigo-600 hover:bg-indigo-100">
+                    ✨
+                </button>
             </div>
             <div id="modal-teacher-list" class="p-4 space-y-2 overflow-y-auto modal-scroll bg-gray-50 flex-grow"></div>
             <div class="p-4 shrink-0 shadow-inner">
@@ -122,29 +134,59 @@
     </div>
 
     <script>
-        const sheetId = '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k';
-        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+        const apiKey = "AIzaSyAOGiYmgTrco3_IndPMnb87CShBQ7O5vo4"; // Diset otomatis oleh lingkungan eksekusi
+        const CONFIG = {
+            SHEET_ID: '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k',
+            MODEL: 'gemini-1.5-flash'
+        };
 
-        const quotes = [
-            "Pendidikan adalah senjata paling ampuh yang dapat Anda gunakan untuk mengubah dunia.",
-            "Guru yang baik itu bagaikan lilin, ia menghabiskan dirinya sendiri untuk mencerahkan jalan bagi orang lain.",
-            "Mari terus berinovasi dalam pembelajaran demi masa depan generasi emas Indonesia.",
-            "Partisipasi Bapak/Ibu dalam survei ini adalah langkah nyata dalam pengembangan profesionalisme berkelanjutan.",
-            "Keberhasilan pendidikan dimulai dari data yang akurat dan dedikasi pengajar yang tak kenal lelah.",
-            "Terima kasih atas kerja keras Anda di garda terdepan pendidikan dasar Kecamatan Kejayan.",
-            "Data yang terkumpul hari ini akan menjadi landasan kebijakan pendidikan yang lebih baik di masa depan.",
-            "Semangat belajar harus tetap menyala, baik bagi murid maupun bagi kita para pendidik."
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+        
+        const STATIC_QUOTES = [
+            "Pendidikan adalah paspor masa depan.",
+            "Guru adalah pelukis masa depan bangsa.",
+            "Setiap partisipasi Anda memajukan pendidikan di Kejayan.",
+            "Dedikasi Bapak/Ibu adalah kunci sukses Best Practice ini."
         ];
 
         let realData = [];
+        let isProcessingAI = false;
+        let activeSchoolForModal = "";
 
-        function getRandomQuote() {
-            return quotes[Math.floor(Math.random() * quotes.length)];
+        // Fungsi API Gemini dengan Exponential Backoff
+        async function callGemini(prompt, fallback) {
+            if (!apiKey) return fallback || STATIC_QUOTES[Math.floor(Math.random() * STATIC_QUOTES.length)];
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL}:generateContent?key=${apiKey}`;
+            
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: "Anda adalah asisten cerdas Prof. Ma'ruf Suroso. Berikan respon yang sangat singkat, inspiratif, dan profesional dalam Bahasa Indonesia." }] }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.candidates?.[0]?.content?.parts?.[0]?.text || fallback;
+                    }
+                    
+                    // Delay exponential: 1s, 2s, 4s, 8s, 16s
+                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
+                } catch (e) {
+                    if (i === 4) return fallback;
+                }
+            }
+            return fallback;
         }
 
         async function fetchData() {
             try {
-                const response = await fetch(csvUrl);
+                const response = await fetch(CSV_URL);
                 const csvText = await response.text();
                 const rows = csvText.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"(.*)"$/, '$1')));
 
@@ -152,15 +194,15 @@
                     nama: r[2], lembaga: r[3] || "Umum", waktu: r[0]
                 }));
                 
-                updateUI();
-                updateMotivation();
-            } catch (e) { console.error("Data fetch error"); }
+                updateDashboardUI();
+            } catch (e) {
+                console.error("Gagal memuat data Google Sheets.");
+            }
         }
 
-        function updateUI() {
+        function updateDashboardUI() {
             document.getElementById('total-count').innerText = realData.length;
             
-            // List Terbaru
             document.getElementById('participant-list').innerHTML = realData.slice(-12).reverse().map(p => `
                 <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm animate-slide">
                     <div class="font-bold text-gray-800">${p.nama} <span class="text-[10px] text-gray-400 block uppercase font-black tracking-tight">${p.lembaga}</span></div>
@@ -168,67 +210,108 @@
                 </div>
             `).join('');
 
-            // Ranking
-            const map = {};
-            realData.forEach(d => map[d.lembaga] = (map[d.lembaga] || 0) + 1);
-            const sorted = Object.entries(map).sort((a,b) => b[1]-a[1]).slice(0, 5);
-            document.getElementById('top-schools').innerHTML = sorted.map(([name, count]) => `
+            const stats = {};
+            realData.forEach(d => stats[d.lembaga] = (stats[d.lembaga] || 0) + 1);
+            const top5 = Object.entries(stats).sort((a,b) => b[1]-a[1]).slice(0, 5);
+            
+            document.getElementById('top-schools').innerHTML = top5.map(([name, count]) => `
                 <div class="mb-4">
                     <div class="flex justify-between text-xs font-bold mb-1.5 text-gray-700 italic">
                         <span class="truncate pr-2">${name}</span>
                         <span>${count}</span>
                     </div>
                     <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div class="bg-blue-600 h-full rounded-full transition-all duration-1000" style="width:${(count/realData.length)*100}%"></div>
+                        <div class="bg-blue-600 h-full rounded-full transition-all duration-700" style="width:${(count/realData.length)*100}%"></div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function updateMotivation() {
-            const el = document.getElementById('motivation-text');
-            el.innerText = getRandomQuote();
+        // FITUR BARU ✨: Analisis Strategis
+        async function generateStrategicAdvice() {
+            if (isProcessingAI) return;
+            isProcessingAI = true;
+
+            const textEl = document.getElementById('ai-insight-text');
+            textEl.className = "text-sm text-indigo-400 italic loading-pulse";
+            textEl.innerText = "✨ AI sedang menganalisis data untuk strategi terbaik...";
+
+            const stats = {};
+            realData.forEach(d => stats[d.lembaga] = (stats[d.lembaga] || 0) + 1);
+            const schoolSummary = Object.entries(stats).map(([k,v]) => `${k}: ${v} guru`).join(", ");
+
+            const prompt = `Data survei saat ini: Total ${realData.length} responden. Rincian: ${schoolSummary}. Identifikasi lembaga dengan partisipasi rendah dan berikan satu kalimat saran tindak lanjut yang taktis bagi Pengawas SD.`;
+            
+            const result = await callGemini(prompt, "Terus monitor partisipasi lembaga dan berikan apresiasi bagi yang sudah mencapai target 100%.");
+            
+            textEl.className = "text-sm text-gray-700 leading-relaxed italic animate-slide";
+            textEl.innerText = result;
+            isProcessingAI = false;
+        }
+
+        async function regenerateSchoolTip() {
+            if (!activeSchoolForModal) return;
+            const tipEl = document.getElementById('modal-ai-tip');
+            const btn = document.getElementById('btn-modal-ai');
+            
+            tipEl.innerText = "✨ Merancang pesan kustom...";
+            btn.disabled = true;
+
+            const prompt = `Berikan satu kalimat ucapan terima kasih yang unik dan sangat hangat untuk guru-guru di ${activeSchoolForModal} yang telah mengisi survei Prof. Ma'ruf Suroso. Sebutkan nama sekolahnya.`;
+            const res = await callGemini(prompt, `Terima kasih Bapak/Ibu Guru ${activeSchoolForModal} atas dedikasinya!`);
+            
+            tipEl.innerText = "✨ " + res;
+            btn.disabled = false;
         }
 
         function switchMenu(menu) {
             document.getElementById('section-home').classList.toggle('hidden', menu !== 'home');
             document.getElementById('section-schools').classList.toggle('hidden', menu !== 'schools');
-            if(menu === 'schools') renderSchools();
+            if(menu === 'schools') renderSchoolDirectory();
             
             document.getElementById('menu-home').className = `w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg ${menu === 'home' ? 'sidebar-active' : 'text-gray-500 hover:bg-gray-50'}`;
             document.getElementById('menu-schools').className = `w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg ${menu === 'schools' ? 'sidebar-active' : 'text-gray-500 hover:bg-gray-50'}`;
         }
 
-        function renderSchools() {
-            const map = {};
-            realData.forEach(d => map[d.lembaga] = (map[d.lembaga] || 0) + 1);
-            document.getElementById('school-directory').innerHTML = Object.keys(map).sort().map(s => `
-                <div onclick="openModal('${s}')" class="p-5 flex justify-between items-center hover:bg-blue-50 cursor-pointer border-b border-gray-50 transition-colors group">
+        function renderSchoolDirectory() {
+            const stats = {};
+            realData.forEach(d => stats[d.lembaga] = (stats[d.lembaga] || 0) + 1);
+            document.getElementById('school-directory').innerHTML = Object.keys(stats).sort().map(s => `
+                <div onclick="openSchoolModal('${s}')" class="p-5 flex justify-between items-center hover:bg-blue-50 cursor-pointer border-b border-gray-50 transition-colors group">
                     <div class="flex flex-col">
                         <span class="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">${s}</span>
-                        <span class="text-[9px] text-gray-400 font-bold uppercase mt-1">Klik untuk rincian</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase mt-1">Lihat daftar guru partisipan</span>
                     </div>
-                    <span class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-black group-hover:bg-blue-600 group-hover:text-white transition-all">${map[s]} GURU</span>
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-black group-hover:bg-blue-600 group-hover:text-white transition-all">${stats[s]} GURU</span>
                 </div>
             `).join('');
         }
 
-        function openModal(school) {
+        function openSchoolModal(school) {
+            activeSchoolForModal = school;
+            const modal = document.getElementById('guru-modal');
+            const listEl = document.getElementById('modal-teacher-list');
+            const tipEl = document.getElementById('modal-ai-tip');
+            
             document.getElementById('modal-school-name').innerText = school;
             const teachers = realData.filter(d => d.lembaga === school);
             document.getElementById('modal-school-count').innerText = `${teachers.length} Guru terdata`;
-            document.getElementById('modal-teacher-list').innerHTML = teachers.map((t, i) => `
+            
+            listEl.innerHTML = teachers.map((t, i) => `
                 <div class="bg-white p-4 rounded-2xl border border-gray-100 font-bold text-sm text-gray-700 shadow-sm animate-slide">
                     ${i+1}. ${t.nama}
                 </div>
             `).join('');
-            document.getElementById('guru-modal').classList.remove('hidden');
+            
+            modal.classList.remove('hidden');
+            tipEl.innerText = "Ketuk ✨ untuk pesan apresiasi cerdas.";
         }
 
         function closeModal() { document.getElementById('guru-modal').classList.add('hidden'); }
         
         fetchData();
-        setInterval(fetchData, 60000); 
+        setInterval(fetchData, 120000); 
     </script>
 </body>
 </html>
+

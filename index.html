@@ -52,8 +52,6 @@
 
         <!-- Konten Utama -->
         <main class="flex-1 p-4 md:p-8">
-            
-            <!-- SECTION BERANDA -->
             <section id="section-home" class="animate-slide">
                 <div class="mb-10 bg-white p-6 rounded-3xl shadow-sm border border-blue-100 border-l-8 border-l-blue-600">
                     <h1 class="text-xl md:text-2xl font-black text-gray-800 leading-tight">
@@ -68,7 +66,6 @@
                         <h3 id="total-count" class="text-4xl font-black">0</h3>
                     </div>
 
-                    <!-- AI AUTOMATIC INSIGHT -->
                     <div class="md:col-span-2 bg-white p-6 rounded-3xl border border-indigo-100 shadow-sm">
                         <div class="flex items-center mb-3">
                             <span class="bg-indigo-100 p-1.5 rounded-lg mr-2 text-indigo-600">✨</span>
@@ -94,7 +91,6 @@
                 </div>
             </section>
 
-            <!-- SECTION DATA LEMBAGA -->
             <section id="section-schools" class="hidden animate-slide">
                 <div class="mb-8">
                     <h2 class="text-2xl font-black text-gray-800 text-center md:text-left">Data Partisipasi Lembaga</h2>
@@ -126,21 +122,22 @@
     </div>
 
     <script>
-        // KONFIGURASI - MASUKKAN API KEY ANDA DI SINI
-        const apiKey = "AIzaSyAOGiYmgTrco3_IndPMnb87CShBQ7O5vo4"; // <--- ISI DI SINI
+        // MASUKKAN API KEY ANDA DI SINI
+        const apiKey = "AIzaSyAOGiYmgTrco3_IndPMnb87CShBQ7O5vo4"; 
         const sheetId = '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k';
         const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
 
         let realData = [];
-        let lastAISummary = "";
+        let lastAISummaryCount = 0;
+        let isProcessingAI = false;
 
-        // Fungsi API Gemini dengan Exponential Backoff
         async function callGemini(prompt) {
-            if (!apiKey) return "Sistem AI belum dikonfigurasi oleh Admin.";
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            if (!apiKey) return "API Key belum terpasang.";
             
-            let delay = 1000;
+            // Ganti ke model yang lebih stabil: gemini-1.5-flash
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            
+            let delay = 1500;
             for (let i = 0; i < 3; i++) {
                 try {
                     const response = await fetch(url, {
@@ -148,24 +145,28 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: { maxOutputTokens: 100 }
+                            generationConfig: { maxOutputTokens: 150, temperature: 0.7 }
                         })
                     });
                     
                     if (response.ok) {
                         const data = await response.json();
-                        return data.candidates?.[0]?.content?.parts?.[0]?.text || "AI sedang istirahat.";
+                        return data.candidates?.[0]?.content?.parts?.[0]?.text || "AI sedang berpikir...";
                     }
-                    if (response.status === 429) { // Rate limit
+                    
+                    if (response.status === 429) { 
                         await new Promise(r => setTimeout(r, delay));
                         delay *= 2;
                         continue;
                     }
+                    
+                    const errData = await response.json();
+                    console.error("API Error Detail:", errData);
                 } catch (e) {
-                    console.error("AI Error:", e);
+                    console.error("Fetch Error:", e);
                 }
             }
-            return "Koneksi AI sedang padat, silakan coba beberapa saat lagi.";
+            return "Koneksi AI sedang padat. Silakan coba muat ulang halaman.";
         }
 
         async function fetchData() {
@@ -186,9 +187,9 @@
         function updateUI() {
             document.getElementById('total-count').innerText = realData.length;
             
-            // Home List
+            // List Terbaru
             document.getElementById('participant-list').innerHTML = realData.slice(-12).reverse().map(p => `
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm hover:shadow-md transition-all animate-slide">
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm animate-slide">
                     <div class="font-bold text-gray-800">${p.nama} <span class="text-[10px] text-gray-400 block uppercase font-black tracking-tight">${p.lembaga}</span></div>
                     <div class="text-[10px] bg-gray-50 px-2 py-1 rounded-lg text-gray-400 font-bold">${p.waktu.split(' ')[1] || ''}</div>
                 </div>
@@ -199,7 +200,7 @@
             realData.forEach(d => map[d.lembaga] = (map[d.lembaga] || 0) + 1);
             const sorted = Object.entries(map).sort((a,b) => b[1]-a[1]).slice(0, 5);
             document.getElementById('top-schools').innerHTML = sorted.map(([name, count]) => `
-                <div class="mb-4 animate-slide">
+                <div class="mb-4">
                     <div class="flex justify-between text-xs font-bold mb-1.5 text-gray-700 italic">
                         <span class="truncate pr-2">${name}</span>
                         <span>${count}</span>
@@ -212,19 +213,22 @@
         }
 
         async function autoUpdateAI() {
-            if (realData.length === 0 || lastAISummary === realData.length) return;
-            lastAISummary = realData.length;
+            if (isProcessingAI || realData.length === 0 || lastAISummaryCount === realData.length) return;
+            
+            isProcessingAI = true;
+            lastAISummaryCount = realData.length;
 
             const insightEl = document.getElementById('ai-insight-text');
             insightEl.className = "text-sm text-gray-400 italic loading-pulse";
-            insightEl.innerText = "AI sedang membaca data terbaru...";
+            insightEl.innerText = "AI sedang menganalisis data terbaru...";
 
-            const samples = realData.slice(-10).map(d => d.lembaga).join(", ");
-            const prompt = `Data survei: Total ${realData.length} responden. Pendaftar terakhir dari lembaga: ${samples}. Berikan 1 kalimat apresiasi singkat dan 1 prediksi perkembangan data dalam Bahasa Indonesia yang sopan.`;
+            const samples = realData.slice(-5).map(d => `${d.nama} (${d.lembaga})`).join(", ");
+            const prompt = `Data survei monitoring Prof Ma'ruf: Total ${realData.length} responden. Baru saja masuk: ${samples}. Berikan satu analisis singkat tren partisipasi dan apresiasi dalam 1 kalimat Bahasa Indonesia yang formal dan memotivasi.`;
 
             const result = await callGemini(prompt);
             insightEl.className = "text-sm text-gray-600 leading-relaxed italic animate-slide";
             insightEl.innerText = result;
+            isProcessingAI = false;
         }
 
         function switchMenu(menu) {
@@ -261,17 +265,17 @@
             `).join('');
             
             const tipEl = document.getElementById('modal-ai-tip');
-            tipEl.innerText = "AI merumuskan pesan untuk " + school + "...";
+            tipEl.innerText = "AI sedang menyapa guru " + school + "...";
             document.getElementById('guru-modal').classList.remove('hidden');
 
-            const res = await callGemini(`Tuliskan 1 kalimat ucapan terima kasih yang sangat memotivasi untuk para guru dari lembaga ${school} karena telah berpartisipasi dalam survei Prof. Dr. H. Ma'ruf Suroso. Singkat dan berwibawa.`);
+            const res = await callGemini(`Tulis 1 kalimat ucapan terima kasih singkat yang memotivasi untuk guru-guru di ${school} yang sudah mengisi survei pendidikan. Bahasa Indonesia yang sopan.`);
             tipEl.innerText = "✨ " + res;
         }
 
         function closeModal() { document.getElementById('guru-modal').classList.add('hidden'); }
         
         fetchData();
-        setInterval(fetchData, 20000); // Sinkronisasi data tiap 20 detik
+        setInterval(fetchData, 30000); // Sinkronisasi tiap 30 detik agar tidak terkena rate limit
     </script>
 </body>
 </html>

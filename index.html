@@ -17,31 +17,58 @@
         }
         .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 25s linear infinite; }
         
+        /* Floating Nav Styles */
+        .floating-nav {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 999px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            padding: 8px;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-icon-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-icon-btn.active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .nav-icon-btn:active {
+            transform: scale(0.9);
+        }
+
         @keyframes highlightBlink {
-            0% { box-shadow: 0 0 0px rgba(37, 99, 235, 0); background-color: transparent; }
-            50% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); background-color: rgba(37, 99, 235, 0.05); }
-            100% { box-shadow: 0 0 0px rgba(37, 99, 235, 0); background-color: transparent; }
+            0% { box-shadow: 0 0 0px rgba(37, 99, 235, 0); }
+            50% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
+            100% { box-shadow: 0 0 0px rgba(37, 99, 235, 0); }
         }
-        .menu-highlight-blink {
-            animation: highlightBlink 2s infinite ease-in-out;
-            border-radius: 0.5rem;
-        }
+        .pulse-active { animation: highlightBlink 2s infinite ease-in-out; }
 
         .modal-scroll::-webkit-scrollbar { width: 6px; }
         .modal-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        /* Mobile Typography Optimization */
-        @media (max-width: 640px) {
-            .text-mobile-base { font-size: 14px !important; }
-            .text-mobile-sm { font-size: 12px !important; }
-            .text-mobile-xs { font-size: 11px !important; }
-        }
-
-        /* Sidebar/Menu Active State */
         .menu-active { background-color: #eff6ff; color: #2563eb; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-gray-900 transition-colors duration-300">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-900 transition-colors duration-300 pb-24">
 
     <!-- Top Notif Bar -->
     <div class="bg-blue-900 text-white py-2 overflow-hidden relative h-10 flex items-center z-50">
@@ -74,15 +101,15 @@
         <!-- Dropdown Menu -->
         <div id="dropdown-menu" class="hidden absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-xl animate-slide overflow-hidden">
             <nav class="p-4 space-y-2">
-                <button onclick="switchMenu('home')" id="menu-home" class="w-full flex items-center px-4 py-4 text-sm font-bold rounded-2xl transition-all menu-active">
+                <button onclick="switchMenu('home')" class="w-full flex items-center px-4 py-4 text-sm font-bold rounded-2xl transition-all hover:bg-gray-50">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     Beranda
                 </button>
-                <button onclick="switchMenu('schools')" id="menu-schools" class="w-full flex items-center px-4 py-4 text-sm font-bold text-gray-500 rounded-2xl transition-all hover:bg-gray-50">
+                <button onclick="switchMenu('schools')" class="w-full flex items-center px-4 py-4 text-sm font-bold rounded-2xl transition-all hover:bg-gray-50">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                     Data Lembaga
                 </button>
-                <button onclick="switchMenu('recommendations')" id="menu-recommendations" class="w-full flex items-center px-4 py-4 text-sm font-bold text-gray-500 rounded-2xl transition-all hover:bg-gray-50 menu-highlight-blink">
+                <button onclick="switchMenu('recommendations')" class="w-full flex items-center px-4 py-4 text-sm font-bold rounded-2xl transition-all hover:bg-gray-50">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
                     Rekomendasi Pengawas ✨
                 </button>
@@ -95,6 +122,19 @@
             </nav>
         </div>
     </header>
+
+    <!-- Floating Nav Melayang -->
+    <div class="floating-nav">
+        <button onclick="switchMenu('home')" id="float-home" class="nav-icon-btn active" title="Beranda">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        </button>
+        <button onclick="switchMenu('schools')" id="float-schools" class="nav-icon-btn" title="Lembaga">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        </button>
+        <button onclick="switchMenu('recommendations')" id="float-recommendations" class="nav-icon-btn" title="Rekomendasi">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+        </button>
+    </div>
 
     <div class="max-w-7xl mx-auto">
         <!-- Main Content -->
@@ -198,7 +238,7 @@
     </div>
 
     <!-- MODAL DETAIL SEKOLAH -->
-    <div id="school-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div id="school-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
             <div class="p-6 bg-blue-600 text-white shrink-0 flex justify-between items-center">
                 <h3 id="modal-school-title" class="text-lg font-black italic">Nama Sekolah</h3>
@@ -273,7 +313,8 @@
         }
 
         function handleDownload() {
-            toggleMenu();
+            const menu = document.getElementById('dropdown-menu');
+            if(!menu.classList.contains('hidden')) toggleMenu();
             downloadCSV();
         }
 
@@ -422,27 +463,36 @@
         }
 
         function switchMenu(menu) {
-            // Close dropdown first
-            toggleMenu();
+            // Close dropdown if open
+            const dropdown = document.getElementById('dropdown-menu');
+            if(!dropdown.classList.contains('hidden')) toggleMenu();
 
             ['home', 'recommendations', 'schools'].forEach(m => {
                 document.getElementById(`section-${m}`).classList.add('hidden');
-                const btn = document.getElementById(`menu-${m}`);
-                btn.classList.remove('menu-active');
-                btn.classList.add('text-gray-500');
-                if(m === 'recommendations') btn.classList.add('menu-highlight-blink');
+                
+                // Reset Floating Nav Icons
+                const floatBtn = document.getElementById(`float-${m}`);
+                floatBtn.classList.remove('active');
+                if(m === 'recommendations') floatBtn.classList.remove('pulse-active');
             });
             
             document.getElementById(`section-${menu}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`menu-${menu}`);
-            activeBtn.classList.add('menu-active');
-            activeBtn.classList.remove('text-gray-500');
+            
+            // Set Active Floating Icon
+            const activeFloat = document.getElementById(`float-${menu}`);
+            activeFloat.classList.add('active');
             
             if(menu === 'recommendations') {
-                activeBtn.classList.remove('menu-highlight-blink');
                 renderRecommendations();
+            } else {
+                // Pulse recommendations icon if not active to draw attention
+                document.getElementById('float-recommendations').classList.add('pulse-active');
             }
+            
             if(menu === 'schools') renderSchoolDirectory();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Initialize

@@ -8,7 +8,6 @@
     <style>
         @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide { animation: slideIn 0.3s ease-out forwards; }
-        .sidebar-active { background-color: #eff6ff; color: #2563eb; border-right: 4px solid #2563eb; }
         
         body { transition: background-color 0.3s, color 0.3s; }
         
@@ -31,57 +30,73 @@
         .modal-scroll::-webkit-scrollbar { width: 6px; }
         .modal-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        /* Penyesuaian khusus HP untuk keterbacaan */
+        /* Mobile Typography Optimization */
         @media (max-width: 640px) {
             .text-mobile-base { font-size: 14px !important; }
             .text-mobile-sm { font-size: 12px !important; }
             .text-mobile-xs { font-size: 11px !important; }
         }
+
+        /* Sidebar/Menu Active State */
+        .menu-active { background-color: #eff6ff; color: #2563eb; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-gray-900 transition-colors duration-300">
 
     <!-- Top Notif Bar -->
-    <div class="bg-blue-900 text-white py-2 overflow-hidden relative h-10 flex items-center">
+    <div class="bg-blue-900 text-white py-2 overflow-hidden relative h-10 flex items-center z-50">
         <div class="animate-marquee absolute font-bold text-[10px] md:text-xs uppercase tracking-widest">
             ✨ STATUS REAL-TIME: Koneksi Stabil • Sinkronisasi Data Otomatis Setiap 60 Detik • Seluruh Responden Terverifikasi 100% ✨
         </div>
     </div>
 
-    <div class="flex flex-col md:flex-row min-h-screen">
-        <!-- Sidebar -->
-        <aside class="w-full md:w-64 bg-white border-r border-gray-200 z-20 shrink-0">
-            <div class="p-6">
-                <div class="flex items-center space-x-3 mb-8">
-                    <div class="bg-blue-600 p-2 rounded-lg text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                    <h1 class="text-xl font-bold text-gray-800 tracking-tight">E-Monitoring</h1>
+    <!-- Navigation Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-1.5 rounded-lg text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
-
-                <nav class="space-y-1">
-                    <button onclick="switchMenu('home')" id="menu-home" class="w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg transition-all sidebar-active">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                        Beranda
-                    </button>
-                    <button onclick="switchMenu('schools')" id="menu-schools" class="w-full flex items-center px-4 py-3 text-sm font-bold text-gray-500 rounded-lg transition-all hover:bg-gray-50">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                        Data Lembaga
-                    </button>
-                    <button onclick="switchMenu('recommendations')" id="menu-recommendations" class="w-full flex items-center px-4 py-3 text-sm font-bold text-gray-500 rounded-lg transition-all hover:bg-gray-50 menu-highlight-blink">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-                        Rekomendasi Pengawas ✨
-                    </button>
-                    <div class="pt-4 mt-4 border-t border-gray-100">
-                        <button onclick="downloadCSV()" class="w-full flex items-center px-4 py-3 text-sm font-bold text-green-600 rounded-lg transition-all hover:bg-green-50">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Download CSV
-                        </button>
-                    </div>
-                </nav>
+                <h1 class="text-lg font-bold text-gray-800 tracking-tight">E-Monitoring</h1>
             </div>
-        </aside>
 
+            <!-- Hamburger Button -->
+            <button id="hamburger-btn" onclick="toggleMenu()" class="p-2 rounded-xl hover:bg-gray-100 transition-colors focus:outline-none">
+                <svg id="hamburger-icon" class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+                <svg id="close-icon" class="w-6 h-6 text-gray-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div id="dropdown-menu" class="hidden absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-xl animate-slide overflow-hidden">
+            <nav class="p-4 space-y-2">
+                <button onclick="switchMenu('home')" id="menu-home" class="w-full flex items-center px-4 py-4 text-sm font-bold rounded-2xl transition-all menu-active">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Beranda
+                </button>
+                <button onclick="switchMenu('schools')" id="menu-schools" class="w-full flex items-center px-4 py-4 text-sm font-bold text-gray-500 rounded-2xl transition-all hover:bg-gray-50">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Data Lembaga
+                </button>
+                <button onclick="switchMenu('recommendations')" id="menu-recommendations" class="w-full flex items-center px-4 py-4 text-sm font-bold text-gray-500 rounded-2xl transition-all hover:bg-gray-50 menu-highlight-blink">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                    Rekomendasi Pengawas ✨
+                </button>
+                <div class="pt-2 border-t border-gray-100">
+                    <button onclick="handleDownload()" class="w-full flex items-center px-4 py-4 text-sm font-bold text-green-600 rounded-2xl transition-all hover:bg-green-50">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download CSV
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto">
         <!-- Main Content -->
         <main class="flex-1 p-4 md:p-8 overflow-x-hidden">
             <!-- Home Section -->
@@ -96,7 +111,7 @@
                     <p class="text-gray-500 font-bold mt-1 text-[10px] md:text-sm uppercase tracking-widest">Pengawas SD Kecamatan Kejayan</p>
                 </div>
 
-                <!-- Rekap Isian (Responsif Grid) -->
+                <!-- Rekap Isian -->
                 <div id="recap-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                     <div class="bg-white p-4 rounded-2xl border border-blue-50 shadow-sm flex flex-col justify-center text-center">
                         <p class="text-[10px] font-black text-blue-400 uppercase tracking-tighter">Total Isian</p>
@@ -128,27 +143,23 @@
                     </div>
                 </div>
 
-                <!-- Tampilan Susun Vertikal: Terbaru di atas, Prioritas di bawah -->
+                <!-- Susunan Vertikal -->
                 <div class="space-y-10">
-                    <!-- Section: Responden Terbaru -->
                     <div>
                         <h2 class="text-md md:text-lg font-black text-gray-800 mb-4 flex items-center uppercase tracking-tight">
                             Responden Terbaru
                             <span class="ml-3 px-2 py-0.5 bg-green-100 text-green-600 text-[9px] md:text-[10px] rounded-full uppercase font-black tracking-tighter animate-pulse">● LIVE</span>
                         </h2>
                         <div id="participant-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <!-- Cards injected here -->
                         </div>
                     </div>
 
-                    <!-- Section: Prioritas Perhatian -->
                     <div>
                         <h2 class="text-md md:text-lg font-black text-gray-800 mb-4 flex items-center uppercase tracking-tight">
                             Prioritas Perhatian
                             <span class="ml-3 px-2 py-0.5 bg-red-100 text-red-600 text-[9px] md:text-[10px] rounded-full uppercase font-black tracking-tighter">PERLU TINDAKAN</span>
                         </h2>
                         <div id="attention-list" class="space-y-3 p-4 md:p-6 bg-white rounded-3xl border border-red-50 shadow-sm">
-                            <!-- List Item Attention -->
                         </div>
                     </div>
                 </div>
@@ -187,7 +198,7 @@
     </div>
 
     <!-- MODAL DETAIL SEKOLAH -->
-    <div id="school-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div id="school-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
             <div class="p-6 bg-blue-600 text-white shrink-0 flex justify-between items-center">
                 <h3 id="modal-school-title" class="text-lg font-black italic">Nama Sekolah</h3>
@@ -203,7 +214,6 @@
     </div>
 
     <script>
-        const apiKey = ""; 
         const SHEET_ID = '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k';
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
 
@@ -221,6 +231,24 @@
         ];
 
         let realData = [];
+
+        // Menu Toggle Logic
+        function toggleMenu() {
+            const menu = document.getElementById('dropdown-menu');
+            const hIcon = document.getElementById('hamburger-icon');
+            const cIcon = document.getElementById('close-icon');
+            const isOpen = !menu.classList.contains('hidden');
+
+            if (isOpen) {
+                menu.classList.add('hidden');
+                hIcon.classList.remove('hidden');
+                cIcon.classList.add('hidden');
+            } else {
+                menu.classList.remove('hidden');
+                hIcon.classList.add('hidden');
+                cIcon.classList.remove('hidden');
+            }
+        }
 
         async function fetchData() {
             try {
@@ -242,6 +270,11 @@
             } catch (e) {
                 console.error("Gagal memuat data.");
             }
+        }
+
+        function handleDownload() {
+            toggleMenu();
+            downloadCSV();
         }
 
         function downloadCSV() {
@@ -268,8 +301,6 @@
         function renderAttentionList() {
             const listEl = document.getElementById('attention-list');
             const stats = {};
-            
-            // Kecualikan "Disdik Kabupaten Pasuruan"
             const filteredForAttention = realData.filter(d => d.lembaga !== "Disdik Kabupaten Pasuruan");
 
             filteredForAttention.forEach(d => {
@@ -391,22 +422,30 @@
         }
 
         function switchMenu(menu) {
+            // Close dropdown first
+            toggleMenu();
+
             ['home', 'recommendations', 'schools'].forEach(m => {
                 document.getElementById(`section-${m}`).classList.add('hidden');
                 const btn = document.getElementById(`menu-${m}`);
-                btn.classList.remove('sidebar-active');
+                btn.classList.remove('menu-active');
                 btn.classList.add('text-gray-500');
                 if(m === 'recommendations') btn.classList.add('menu-highlight-blink');
             });
+            
             document.getElementById(`section-${menu}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`menu-${menu}`);
-            activeBtn.classList.add('sidebar-active');
+            activeBtn.classList.add('menu-active');
             activeBtn.classList.remove('text-gray-500');
-            if(menu === 'recommendations') activeBtn.classList.remove('menu-highlight-blink');
-            if(menu === 'recommendations') renderRecommendations();
+            
+            if(menu === 'recommendations') {
+                activeBtn.classList.remove('menu-highlight-blink');
+                renderRecommendations();
+            }
             if(menu === 'schools') renderSchoolDirectory();
         }
 
+        // Initialize
         setRandomMotivation();
         fetchData();
         setInterval(fetchData, 60000); 

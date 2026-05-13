@@ -43,9 +43,9 @@
                 <div class="mt-10 p-4 bg-blue-50 rounded-2xl border border-blue-100">
                     <div class="flex items-center text-blue-700 mb-1">
                         <span class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
-                        <span class="text-[10px] font-black uppercase">AI System Active</span>
+                        <span class="text-[10px] font-black uppercase">System Online</span>
                     </div>
-                    <p class="text-[9px] text-blue-600 leading-tight italic">AI menganalisis data secara otomatis untuk semua pengunjung.</p>
+                    <p class="text-[9px] text-blue-600 leading-tight italic">Sistem memantau partisipasi secara real-time untuk kemajuan bersama.</p>
                 </div>
             </div>
         </aside>
@@ -68,11 +68,11 @@
 
                     <div class="md:col-span-2 bg-white p-6 rounded-3xl border border-indigo-100 shadow-sm">
                         <div class="flex items-center mb-3">
-                            <span class="bg-indigo-100 p-1.5 rounded-lg mr-2 text-indigo-600">✨</span>
-                            <h4 class="font-bold text-gray-800">Analisis Otomatis AI</h4>
+                            <span class="bg-indigo-100 p-1.5 rounded-lg mr-2 text-indigo-600">💡</span>
+                            <h4 class="font-bold text-gray-800">Pesan Motivasi Hari Ini</h4>
                         </div>
-                        <p id="ai-insight-text" class="text-sm text-gray-600 leading-relaxed italic min-h-[3rem]">
-                            Menunggu data untuk dianalisis...
+                        <p id="motivation-text" class="text-sm text-gray-600 leading-relaxed italic min-h-[3rem]">
+                            Memuat inspirasi pendidikan...
                         </p>
                     </div>
                 </div>
@@ -111,8 +111,8 @@
                 <h3 id="modal-school-name" class="text-lg font-black leading-tight italic">Nama Sekolah</h3>
                 <p id="modal-school-count" class="text-blue-100 text-xs mt-1">0 Guru terdata</p>
             </div>
-            <div id="modal-ai-tip" class="p-4 bg-indigo-50 border-b border-indigo-100 text-[11px] text-indigo-700 font-bold italic shrink-0">
-                AI sedang merumuskan pesan motivasi...
+            <div class="p-4 bg-indigo-50 border-b border-indigo-100 text-[11px] text-indigo-700 font-bold italic shrink-0">
+                Apresiasi untuk semangat dedikasi Bapak/Ibu Guru.
             </div>
             <div id="modal-teacher-list" class="p-4 space-y-2 overflow-y-auto modal-scroll bg-gray-50 flex-grow"></div>
             <div class="p-4 shrink-0 shadow-inner">
@@ -122,51 +122,24 @@
     </div>
 
     <script>
-        // MASUKKAN API KEY ANDA DI SINI
-        const apiKey = "AIzaSyAOGiYmgTrco3_IndPMnb87CShBQ7O5vo4"; 
         const sheetId = '1FS3bN4rJZfYWG4usgnz12lOrfO5UgbmG6chmdtR_R9k';
         const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
 
+        const quotes = [
+            "Pendidikan adalah senjata paling ampuh yang dapat Anda gunakan untuk mengubah dunia.",
+            "Guru yang baik itu bagaikan lilin, ia menghabiskan dirinya sendiri untuk mencerahkan jalan bagi orang lain.",
+            "Mari terus berinovasi dalam pembelajaran demi masa depan generasi emas Indonesia.",
+            "Partisipasi Bapak/Ibu dalam survei ini adalah langkah nyata dalam pengembangan profesionalisme berkelanjutan.",
+            "Keberhasilan pendidikan dimulai dari data yang akurat dan dedikasi pengajar yang tak kenal lelah.",
+            "Terima kasih atas kerja keras Anda di garda terdepan pendidikan dasar Kecamatan Kejayan.",
+            "Data yang terkumpul hari ini akan menjadi landasan kebijakan pendidikan yang lebih baik di masa depan.",
+            "Semangat belajar harus tetap menyala, baik bagi murid maupun bagi kita para pendidik."
+        ];
+
         let realData = [];
-        let lastAISummaryCount = 0;
-        let isProcessingAI = false;
 
-        async function callGemini(prompt, fallbackText) {
-            if (!apiKey) return fallbackText;
-            
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
-            let retryCount = 0;
-            const maxRetries = 3;
-
-            while (retryCount < maxRetries) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: { maxOutputTokens: 150, temperature: 0.7 }
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.candidates?.[0]?.content?.parts?.[0]?.text || fallbackText;
-                    }
-                    
-                    if (response.status === 429 || response.status === 503) {
-                        retryCount++;
-                        await new Promise(r => setTimeout(r, 1500 * retryCount));
-                        continue;
-                    }
-                    break;
-                } catch (e) {
-                    retryCount++;
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-            }
-            return fallbackText;
+        function getRandomQuote() {
+            return quotes[Math.floor(Math.random() * quotes.length)];
         }
 
         async function fetchData() {
@@ -180,7 +153,7 @@
                 }));
                 
                 updateUI();
-                autoUpdateAI();
+                updateMotivation();
             } catch (e) { console.error("Data fetch error"); }
         }
 
@@ -212,25 +185,9 @@
             `).join('');
         }
 
-        async function autoUpdateAI() {
-            if (isProcessingAI || realData.length === 0 || lastAISummaryCount === realData.length) return;
-            
-            isProcessingAI = true;
-            lastAISummaryCount = realData.length;
-
-            const insightEl = document.getElementById('ai-insight-text');
-            insightEl.className = "text-sm text-gray-400 italic loading-pulse";
-            insightEl.innerText = "AI sedang menyusun ringkasan...";
-
-            const samples = realData.slice(-3).map(d => `${d.nama} (${d.lembaga})`).join(", ");
-            const prompt = `Berperanlah sebagai asisten cerdas Prof. Ma'ruf Suroso. Total responden saat ini ${realData.length}. Guru terbaru yang mengisi adalah ${samples}. Berikan satu kalimat apresiasi singkat dan penyemangat yang profesional dalam Bahasa Indonesia untuk dashboard monitoring ini.`;
-            
-            const defaultInsight = `Hingga saat ini terdapat ${realData.length} partisipan. Mari terus tingkatkan partisipasi untuk kemajuan pendidikan kita.`;
-
-            const result = await callGemini(prompt, defaultInsight);
-            insightEl.className = "text-sm text-gray-600 leading-relaxed italic animate-slide";
-            insightEl.innerText = result;
-            isProcessingAI = false;
+        function updateMotivation() {
+            const el = document.getElementById('motivation-text');
+            el.innerText = getRandomQuote();
         }
 
         function switchMenu(menu) {
@@ -256,7 +213,7 @@
             `).join('');
         }
 
-        async function openModal(school) {
+        function openModal(school) {
             document.getElementById('modal-school-name').innerText = school;
             const teachers = realData.filter(d => d.lembaga === school);
             document.getElementById('modal-school-count').innerText = `${teachers.length} Guru terdata`;
@@ -265,14 +222,7 @@
                     ${i+1}. ${t.nama}
                 </div>
             `).join('');
-            
-            const tipEl = document.getElementById('modal-ai-tip');
-            tipEl.innerText = "Menghubungkan ke asisten AI...";
             document.getElementById('guru-modal').classList.remove('hidden');
-
-            const defaultTip = `Terima kasih atas partisipasi aktif Bapak/Ibu guru dari ${school} dalam menyukseskan program Best Practice ini.`;
-            const res = await callGemini(`Tuliskan satu kalimat singkat penyemangat untuk guru-guru di ${school} yang telah berpartisipasi dalam penelitian survei Prof. Ma'ruf Suroso.`, defaultTip);
-            tipEl.innerText = "✨ " + res;
         }
 
         function closeModal() { document.getElementById('guru-modal').classList.add('hidden'); }
